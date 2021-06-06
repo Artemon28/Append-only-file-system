@@ -51,9 +51,6 @@ public class DatabaseImpl implements Database {
         nameOfData = dataBaseName;
     }
 
-    public static Database initializeFromContext(DatabaseInitializationContext context) {
-        return null;
-    }
 
     @Override
     public String getName() {

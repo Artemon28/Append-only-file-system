@@ -8,6 +8,7 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class DatabaseServerInitializer implements Initializer {
+    private final DatabaseInitializer dbInitializer;
 
     public DatabaseServerInitializer(DatabaseInitializer databaseInitializer) {
         dbInitializer = databaseInitializer;

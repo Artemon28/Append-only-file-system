@@ -58,7 +58,7 @@ public class DatabaseServer {
         return CompletableFuture.supplyAsync(() -> {
             return command.execute();
         }, executorService);
-
+    }
     public ExecutionEnvironment getEnv() {
         //TODO implement
         return null;

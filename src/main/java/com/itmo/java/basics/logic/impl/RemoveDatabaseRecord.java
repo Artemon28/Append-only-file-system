@@ -5,20 +5,33 @@ import com.itmo.java.basics.logic.WritableDatabaseRecord;
 /**
  * Запись в БД, означающая удаление значения по ключу
  */
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
 public class RemoveDatabaseRecord implements WritableDatabaseRecord {
+
+    private final String recordKey;
+    private final int recordKeySize;
+    private static final int recordValueSize = -1;
+
+    public RemoveDatabaseRecord(String _key) {
+        recordKey = _key;
+        recordKeySize = _key.length();
+    }
+
     @Override
     public byte[] getKey() {
-        return new byte[0];
+        return recordKey.getBytes(StandardCharsets.UTF_8);
     }
 
     @Override
     public byte[] getValue() {
-        return new byte[0];
+        return null;
     }
 
     @Override
     public long size() {
-        return 0;
+        return recordKeySize + 8;
     }
 
     @Override
@@ -28,11 +41,11 @@ public class RemoveDatabaseRecord implements WritableDatabaseRecord {
 
     @Override
     public int getKeySize() {
-        return 0;
+        return recordKeySize;
     }
 
     @Override
     public int getValueSize() {
-        return 0;
+        return recordValueSize;
     }
 }

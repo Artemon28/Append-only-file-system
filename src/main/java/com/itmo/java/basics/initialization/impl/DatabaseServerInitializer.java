@@ -4,9 +4,13 @@ import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.initialization.InitializationContext;
 import com.itmo.java.basics.initialization.Initializer;
 
+import java.io.File;
+import java.nio.file.Path;
+
 public class DatabaseServerInitializer implements Initializer {
 
     public DatabaseServerInitializer(DatabaseInitializer databaseInitializer) {
+        dbInitializer = databaseInitializer;
     }
 
     /**
@@ -18,5 +22,23 @@ public class DatabaseServerInitializer implements Initializer {
      */
     @Override
     public void perform(InitializationContext context) throws DatabaseException {
+        Path pathToEnvironment = context.executionEnvironment().getWorkingPath();
+        File f = new File(String.valueOf(pathToEnvironment));
+        if (!(f.exists() && f.isDirectory())) {
+            f.mkdir();
+            return;
+        }
+        String[] listOfDatabaseNames = f.list();
+        for (String dbName : listOfDatabaseNames) {
+            if (new File(String.valueOf(pathToEnvironment.resolve(dbName))).isDirectory()) {
+                DatabaseInitializationContextImpl currentDbContext = new DatabaseInitializationContextImpl(dbName, pathToEnvironment);
+                InitializationContextImpl context2 = new InitializationContextImpl(context.executionEnvironment(), currentDbContext, null, null);
+                try {
+                    dbInitializer.perform(context2);
+                } catch (DatabaseException dex) {
+                    throw new DatabaseException("Exeption in Databasetinit perform", dex);
+                }
+            }
+        }
     }
 }

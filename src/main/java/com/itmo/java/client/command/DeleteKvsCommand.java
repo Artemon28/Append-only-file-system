@@ -4,12 +4,20 @@ import com.itmo.java.protocol.model.RespArray;
 import com.itmo.java.protocol.model.RespBulkString;
 import com.itmo.java.protocol.model.RespCommandId;
 
+import java.nio.charset.StandardCharsets;
+
 public class DeleteKvsCommand implements KvsCommand {
     private static final String COMMAND_NAME = "DELETE_KEY";
 
-
+    private final String databaseName;
+    private final String tableName;
+    private final String key;
+    private final int id;
     public DeleteKvsCommand(String databaseName, String tableName, String key) {
-        //TODO implement
+        this.databaseName = databaseName;
+        this.tableName = tableName;
+        this.key = key;
+        id = idGen.incrementAndGet();
     }
 
     /**
@@ -19,13 +27,16 @@ public class DeleteKvsCommand implements KvsCommand {
      */
     @Override
     public RespArray serialize() {
-        //TODO implement
-        return null;
+        RespCommandId respCommandId = new RespCommandId(id);
+        RespBulkString commandName = new RespBulkString(COMMAND_NAME.getBytes(StandardCharsets.UTF_8));
+        RespBulkString respBulkDbName = new RespBulkString(databaseName.getBytes(StandardCharsets.UTF_8));
+        RespBulkString respBulkTableName = new RespBulkString(tableName.getBytes(StandardCharsets.UTF_8));
+        RespBulkString respBulkKey = new RespBulkString(key.getBytes(StandardCharsets.UTF_8));
+        return new RespArray(respCommandId, commandName, respBulkDbName, respBulkTableName, respBulkKey);
     }
 
     @Override
     public int getCommandId() {
-        //TODO implement
-        return 0;
+        return id;
     }
 }

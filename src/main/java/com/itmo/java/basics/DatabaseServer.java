@@ -59,8 +59,8 @@ public class DatabaseServer {
             return command.execute();
         }, executorService);
     }
+
     public ExecutionEnvironment getEnv() {
-        //TODO implement
-        return null;
+        return env;
     }
 }

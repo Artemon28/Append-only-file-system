@@ -7,6 +7,7 @@ import com.itmo.java.protocol.RespWriter;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,19 +16,25 @@ import java.util.concurrent.Executors;
  * Класс, который предоставляет доступ к серверу через сокеты
  */
 public class JavaSocketServerConnector implements Closeable {
+    private final DatabaseServer databaseServer;
+    private final ServerConfig config;
 
     /**
      * Экзекьютор для выполнения ClientTask
      */
     private final ExecutorService clientIOWorkers = Executors.newSingleThreadExecutor();
 
-//    private final ServerSocket serverSocket; // todo uncomment
+    private final ServerSocket serverSocket;
     private final ExecutorService connectionAcceptorExecutor = Executors.newSingleThreadExecutor();
+
 
     /**
      * Стартует сервер. По аналогии с сокетом открывает коннекшн в конструкторе.
      */
     public JavaSocketServerConnector(DatabaseServer databaseServer, ServerConfig config) throws IOException {
+        this.databaseServer = databaseServer;
+        this.config = config;
+        serverSocket = new ServerSocket(config.getPort());
     }
  
      /**
@@ -35,7 +42,12 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
-            // todo implement
+            try {
+                Socket clientSocket = serverSocket.accept();
+                clientSocket.getInputStream();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -45,7 +57,11 @@ public class JavaSocketServerConnector implements Closeable {
     @Override
     public void close() {
         System.out.println("Stopping socket connector");
-        // todo implement
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -57,13 +73,15 @@ public class JavaSocketServerConnector implements Closeable {
      * Runnable, описывающий исполнение клиентской команды.
      */
     static class ClientTask implements Runnable, Closeable {
-
+        private final Socket client;
+        private final DatabaseServer server;
         /**
          * @param client клиентский сокет
          * @param server сервер, на котором исполняется задача
          */
         public ClientTask(Socket client, DatabaseServer server) {
-            //TODO implement
+            this.client = client;
+            this.server = server;
         }
 
         /**
@@ -75,7 +93,7 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void run() {
-            //TODO implement
+
         }
 
         /**
@@ -83,7 +101,6 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void close() {
-            //TODO implement
         }
     }
 }

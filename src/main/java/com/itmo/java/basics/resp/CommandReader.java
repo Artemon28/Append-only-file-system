@@ -1,23 +1,29 @@
 package com.itmo.java.basics.resp;
 
 import com.itmo.java.basics.console.DatabaseCommand;
+import com.itmo.java.basics.console.DatabaseCommandArgPositions;
+import com.itmo.java.basics.console.DatabaseCommands;
 import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.protocol.RespReader;
+import com.itmo.java.protocol.model.RespObject;
 
 import java.io.IOException;
+import java.util.List;
 
 public class CommandReader implements AutoCloseable {
+    private final RespReader reader;
+    private final ExecutionEnvironment env;
 
     public CommandReader(RespReader reader, ExecutionEnvironment env) {
-        //TODO implement
+        this.reader = reader;
+        this.env = env;
     }
 
     /**
      * Есть ли следующая команда в ридере?
      */
     public boolean hasNextCommand() throws IOException {
-        //TODO implement
-        return false;
+        return reader.hasArray();
     }
 
     /**
@@ -26,12 +32,18 @@ public class CommandReader implements AutoCloseable {
      * @throws IllegalArgumentException если нет имени команды и id
      */
     public DatabaseCommand readCommand() throws IOException {
-        //TODO implement
-        return null;
+        List<RespObject> messageObjects = reader.readArray().getObjects();
+        String currentCommand = messageObjects.get(DatabaseCommandArgPositions.valueOf("COMMAND_NAME")
+                .getPositionIndex()).asString();
+        if (messageObjects.get(DatabaseCommandArgPositions.valueOf("COMMAND_ID").getPositionIndex())
+                .asString() == null || currentCommand == null) {
+            throw new IllegalArgumentException("command id or command name is null");
+        }
+        return DatabaseCommands.valueOf(currentCommand).getCommand(env, messageObjects);
     }
 
     @Override
     public void close() throws Exception {
-        //TODO implement
+        reader.close();
     }
 }

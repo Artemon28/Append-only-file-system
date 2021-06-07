@@ -12,7 +12,6 @@ import com.itmo.java.protocol.model.RespObject;
 public class SocketKvsConnection implements KvsConnection {
 
     public SocketKvsConnection(ConnectionConfig config) {
-        //TODO implement
     }
 
     /**
@@ -23,7 +22,6 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
-        //TODO implement
         return null;
     }
 
@@ -32,6 +30,5 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public void close() {
-        //TODO implement
     }
 }

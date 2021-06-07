@@ -33,6 +33,12 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
+        if (config.getHost() == null){
+            throw new ConnectionException("Host is null");
+        }
+        if (config.getPort() == 0){
+            throw new ConnectionException("Host is null");
+        }
         try {
             RespWriter writeCommand = new RespWriter(socket.getOutputStream());
             writeCommand.write(command);

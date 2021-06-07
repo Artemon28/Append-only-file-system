@@ -93,7 +93,6 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void run() {
-
         }
 
         /**

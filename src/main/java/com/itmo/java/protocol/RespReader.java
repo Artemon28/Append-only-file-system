@@ -14,7 +14,6 @@ import java.util.Arrays;
 
 public class RespReader implements AutoCloseable {
     private final InputStream is;
-    private byte[] currentRespObjectType = null;
     private boolean isHasArray = false;
 
     /**
@@ -34,7 +33,7 @@ public class RespReader implements AutoCloseable {
         if (isHasArray) {
             return true;
         }
-        currentRespObjectType = is.readNBytes(1);
+        byte[] currentRespObjectType = is.readNBytes(1);
         if (currentRespObjectType[0] == RespArray.CODE){
             isHasArray = true;
             return true;
@@ -54,13 +53,14 @@ public class RespReader implements AutoCloseable {
             byte[] firstSymbol = is.readNBytes(1);
             if (firstSymbol[0] == RespError.CODE){
                 return readError();
-            } else if(firstSymbol[0] == RespBulkString.CODE){
-                return readBulkString();
-            } else if(firstSymbol[0] == RespCommandId.CODE){
-                return readCommandId();
-            } else {
-                throw new IOException("unknow byte" + new String(firstSymbol));
             }
+            if(firstSymbol[0] == RespBulkString.CODE){
+                return readBulkString();
+            }
+            if(firstSymbol[0] == RespCommandId.CODE){
+                return readCommandId();
+            }
+            throw new IOException("unknow byte" + new String(firstSymbol));
         } catch (IOException e){
             throw new IOException("can't read next first symbol", e);
         }
@@ -145,7 +145,7 @@ public class RespReader implements AutoCloseable {
             int arraySize = readInt();
             is.readNBytes(1); //LF
             RespObject[] listObjects = new RespObject[arraySize];
-            for (int i = 0; i <= arraySize; i++){
+            for (int i = 0; i < arraySize; i++){
                 listObjects[i] = readObject();
             }
             return new RespArray(listObjects);

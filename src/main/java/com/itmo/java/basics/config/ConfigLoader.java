@@ -51,8 +51,10 @@ public class ConfigLoader {
         workingPath = configFileProp.getProperty("kvs.workingPath");
         host = configFileProp.getProperty("kvs.host");
         String stringPort = configFileProp.getProperty("kvs.port");
-        if (host == null || stringPort == null){
+        if (host == null){
             host = ServerConfig.DEFAULT_HOST;
+        }
+        if (stringPort == null) {
             port = ServerConfig.DEFAULT_PORT;
         } else {
             port = Integer.parseInt(stringPort);

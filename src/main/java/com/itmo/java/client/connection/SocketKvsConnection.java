@@ -22,6 +22,7 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
+
         return null;
     }
 
@@ -30,5 +31,6 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public void close() {
+
     }
 }

@@ -35,12 +35,12 @@ public class SocketKvsConnection implements KvsConnection {
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
             RespWriter writeCommand = new RespWriter(socket.getOutputStream());
+            writeCommand.write(command);
             RespObject answerFromServer = new RespReader(socket.getInputStream()).readArray();
+            return answerFromServer;
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ConnectionException("yes", e);
         }
-
-        return null;
     }
 
     /**

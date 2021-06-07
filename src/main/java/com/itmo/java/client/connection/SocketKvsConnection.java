@@ -6,12 +6,23 @@ import com.itmo.java.protocol.RespWriter;
 import com.itmo.java.protocol.model.RespArray;
 import com.itmo.java.protocol.model.RespObject;
 
+import java.io.IOException;
+import java.net.Socket;
+
 /**
  * С помощью {@link RespWriter} и {@link RespReader} читает/пишет в сокет
  */
 public class SocketKvsConnection implements KvsConnection {
+    private ConnectionConfig config;
+    Socket socket;
 
     public SocketKvsConnection(ConnectionConfig config) {
+        this.config = config;
+        try {
+            socket = new Socket(config.getHost(), config.getPort());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -22,6 +33,12 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
+        try {
+            RespWriter writeCommand = new RespWriter(socket.getOutputStream());
+            RespObject answerFromServer = new RespReader(socket.getInputStream()).readArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return null;
     }
@@ -31,6 +48,10 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public void close() {
-
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

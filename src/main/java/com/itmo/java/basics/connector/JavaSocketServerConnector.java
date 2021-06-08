@@ -103,7 +103,9 @@ public class JavaSocketServerConnector implements Closeable {
         list[2] = (new RespBulkString("zzz".getBytes(StandardCharsets.UTF_8)));
         list[3] = (new RespBulkString("laba6tabletest".getBytes(StandardCharsets.UTF_8)));
         RespObject ans = sss.send(1, new RespArray(list));
+        RespObject ans1 = sss.send(2, new RespArray(list));
         System.out.println(ans.asString());
+        System.out.println(ans1.asString());
         j.close();
     }
 
@@ -135,7 +137,6 @@ public class JavaSocketServerConnector implements Closeable {
                 DatabaseCommand command = new CommandReader(new RespReader(client.getInputStream()), server.getEnv()).readCommand();
                 RespArray result = new RespArray(command.execute().serialize());
                 new RespWriter(client.getOutputStream()).write(result);
-                close();
             } catch (IOException e) {
                 throw new UncheckedIOException("exception in running command from client", e);
             }

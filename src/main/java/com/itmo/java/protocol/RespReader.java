@@ -48,26 +48,29 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        byte[] firstSymbol = is.readNBytes(1);
-        if (firstSymbol.length == 0){
-            throw new EOFException("end of the stream");
+        try {
+            byte[] firstSymbol = is.readNBytes(1);
+            if (firstSymbol.length == 0){
+                throw new EOFException("end of the stream");
+            }
+            if (firstSymbol[0] == RespError.CODE){
+                return readError();
+            }
+            if(firstSymbol[0] == RespBulkString.CODE){
+                return readBulkString();
+            }
+            if(firstSymbol[0] == RespCommandId.CODE){
+                return readCommandId();
+            }
+            throw new IOException("unknow byte" + new String(firstSymbol));
+        } catch (IOException e){
+            throw new IOException("can't read first symbol", e);
         }
-        if (firstSymbol[0] == RespError.CODE){
-            return readError();
-        }
-        if(firstSymbol[0] == RespBulkString.CODE){
-            return readBulkString();
-        }
-        if(firstSymbol[0] == RespCommandId.CODE){
-            return readCommandId();
-        }
-        throw new IOException("unknown byte" + new String(firstSymbol));
-
     }
 
 
     private int readInt() throws IOException {
-
+        try{
             StringBuilder size = new StringBuilder();
             byte[] sizeByte = is.readNBytes(1);
             if (sizeByte.length == 0){
@@ -80,12 +83,14 @@ public class RespReader implements AutoCloseable {
                     throw new EOFException("end of the stream");
                 }
             }
-            try {
+//            try {
                 return Integer.parseInt(size.toString());
-            } catch (NumberFormatException e) {
-                throw new IOException("expected reading int from this string: " + size.toString());
-            }
-
+//            } catch (NumberFormatException e) {
+//                throw new IOException("expected reading int from this string: " + size.toString());
+//            }
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading int", e);
+        }
     }
 
     /**
@@ -169,9 +174,13 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespCommandId readCommandId() throws IOException {
-        int commandId = readInt();
-        readCompareByte(LF);
-        return new RespCommandId(commandId);
+        try {
+            int commandId = readInt();
+            readCompareByte(LF);
+            return new RespCommandId(commandId);
+        } catch (IOException e) {
+            throw new IOException("IO exception in reading command id", e);
+        }
     }
 
     private byte[] readCompareByte(byte compareWith) throws IOException {

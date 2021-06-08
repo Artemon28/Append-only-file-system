@@ -188,7 +188,7 @@ public class RespReader implements AutoCloseable {
         }
     }
 
-    private byte[] readCompareByte(byte compareWith) throws IOException {
+    private void readCompareByte(byte compareWith) throws IOException {
         byte[] nextByte;
         try {
             nextByte = is.readNBytes(1);
@@ -197,7 +197,6 @@ public class RespReader implements AutoCloseable {
             } else if (nextByte[0] != compareWith) {
                 throw new IOException("expected symbol:  " + String.valueOf(compareWith) + " but get: " + String.valueOf(nextByte[0]));
             }
-            return nextByte;
         } catch (IOException e) {
             throw new IOException("IO exception in reading byte", e);
         }

@@ -83,11 +83,11 @@ public class RespReader implements AutoCloseable {
                     throw new EOFException("end of the stream");
                 }
             }
-//            try {
+            try {
                 return Integer.parseInt(size.toString());
-//            } catch (NumberFormatException e) {
-//                throw new IOException("expected reading int from this string: " + size.toString());
-//            }
+            } catch (NumberFormatException e) {
+                throw new IOException("expected reading int from this string: " + size.toString());
+            }
         } catch (IOException e) {
             throw new IOException("IO exception in reading int", e);
         }
@@ -175,7 +175,7 @@ public class RespReader implements AutoCloseable {
      */
     public RespCommandId readCommandId() throws IOException {
         try {
-            int commandId = readInt();
+            int commandId = is.read();
             readCompareByte(LF);
             return new RespCommandId(commandId);
         } catch (IOException e) {

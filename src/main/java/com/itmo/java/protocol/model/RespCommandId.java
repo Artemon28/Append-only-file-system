@@ -43,7 +43,7 @@ public class RespCommandId implements RespObject {
             os.write((commandId >>>  0) & 0xFF);
             os.write(CRLF);
         } catch (IOException e){
-            throw new IOException("IO exeption in writing command id", e);
+            throw new IOException("IO exception in writing command id", e);
         }
     }
 }

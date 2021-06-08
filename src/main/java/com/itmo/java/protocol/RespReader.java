@@ -67,7 +67,7 @@ public class RespReader implements AutoCloseable {
 
 
     private int readInt() throws IOException {
-        try{
+
             StringBuilder size = new StringBuilder();
             byte[] sizeByte = is.readNBytes(1);
             if (sizeByte.length == 0){
@@ -85,9 +85,7 @@ public class RespReader implements AutoCloseable {
             } catch (NumberFormatException e) {
                 throw new IOException("expected reading int from this string: " + size.toString());
             }
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading int", e);
-        }
+
     }
 
     /**

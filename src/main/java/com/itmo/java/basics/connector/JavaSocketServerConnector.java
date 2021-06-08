@@ -86,24 +86,24 @@ public class JavaSocketServerConnector implements Closeable {
 
 
     public static void main(String[] args) throws Exception {
-//        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
-//        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
-//        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
-//        DatabaseServerInitializer initializer =
-//                new DatabaseServerInitializer(
-//                        new DatabaseInitializer(
-//                                new TableInitializer(
-//                                        new SegmentInitializer())));
-//        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
-//        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
-//        j.start();
-//        SocketKvsConnection sss = new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()));
-//        RespObject[] list = new RespObject[4];
-//        list[0] = (new RespCommandId(1));
-//        list[1] = (new RespBulkString("CREATE_TABLE".getBytes(StandardCharsets.UTF_8)));
-//        list[2] = (new RespBulkString("zzz".getBytes(StandardCharsets.UTF_8)));
-//        list[3] = (new RespBulkString("laba6tabletest".getBytes(StandardCharsets.UTF_8)));
-//        RespObject ans = sss.send(1, new RespArray(list));
+        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
+        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
+        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
+        DatabaseServerInitializer initializer =
+                new DatabaseServerInitializer(
+                        new DatabaseInitializer(
+                                new TableInitializer(
+                                        new SegmentInitializer())));
+        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
+        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
+        j.start();
+        SocketKvsConnection sss = new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()));
+        RespObject[] list = new RespObject[4];
+        list[0] = (new RespCommandId(1));
+        list[1] = (new RespBulkString("CREATE_TABLE".getBytes(StandardCharsets.UTF_8)));
+        list[2] = (new RespBulkString("zzz".getBytes(StandardCharsets.UTF_8)));
+        list[3] = (new RespBulkString("laba6tabletest".getBytes(StandardCharsets.UTF_8)));
+        RespObject ans = sss.send(1, new RespArray(list));
     }
 
     /**
@@ -132,7 +132,8 @@ public class JavaSocketServerConnector implements Closeable {
         public void run() {
             try {
                 DatabaseCommand command = new CommandReader(new RespReader(client.getInputStream()), server.getEnv()).readCommand();
-                new RespWriter(client.getOutputStream()).write(command.execute().serialize());
+                RespArray result = new RespArray(command.execute().serialize());
+                new RespWriter(client.getOutputStream()).write(result);
             } catch (IOException e) {
                 close();
                 throw new UncheckedIOException("exception in running command from client", e);

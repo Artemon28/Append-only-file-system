@@ -48,24 +48,21 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespObject readObject() throws IOException {
-        try {
-            byte[] firstSymbol = is.readNBytes(1);
-            if (firstSymbol.length == 0){
-                throw new EOFException("end of the stream");
-            }
-            if (firstSymbol[0] == RespError.CODE){
-                return readError();
-            }
-            if(firstSymbol[0] == RespBulkString.CODE){
-                return readBulkString();
-            }
-            if(firstSymbol[0] == RespCommandId.CODE){
-                return readCommandId();
-            }
-            throw new IOException("unknow byte" + new String(firstSymbol));
-        } catch (IOException e){
-            throw new IOException("can't read next first symbol", e);
+        byte[] firstSymbol = is.readNBytes(1);
+        if (firstSymbol.length == 0){
+            throw new EOFException("end of the stream");
         }
+        if (firstSymbol[0] == RespError.CODE){
+            return readError();
+        }
+        if(firstSymbol[0] == RespBulkString.CODE){
+            return readBulkString();
+        }
+        if(firstSymbol[0] == RespCommandId.CODE){
+            return readCommandId();
+        }
+        throw new IOException("unknown byte" + new String(firstSymbol));
+
     }
 
 
@@ -151,7 +148,6 @@ public class RespReader implements AutoCloseable {
      */
     public RespArray readArray() throws IOException {
         try {
-            byte[] firstSymbol;
             if (!isHasArray) {
                 readCompareByte(RespArray.CODE);
             }

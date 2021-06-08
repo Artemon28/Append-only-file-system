@@ -40,6 +40,7 @@ public class SocketKvsConnection implements KvsConnection {
             RespObject answerFromServer = new RespReader(socket.getInputStream()).readArray();
             return answerFromServer;
         } catch (IOException e) {
+            close();
             throw new ConnectionException("yes", e);
         }
     }

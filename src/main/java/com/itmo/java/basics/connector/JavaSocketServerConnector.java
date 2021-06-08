@@ -2,11 +2,15 @@ package com.itmo.java.basics.connector;
 
 import com.itmo.java.basics.DatabaseServer;
 import com.itmo.java.basics.config.ServerConfig;
+import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.resp.CommandReader;
+import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
+import com.itmo.java.protocol.model.RespObject;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -44,9 +48,8 @@ public class JavaSocketServerConnector implements Closeable {
         connectionAcceptorExecutor.submit(() -> {
             try {
                 Socket clientSocket = serverSocket.accept();
-                clientSocket.getInputStream();
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new UncheckedIOException("exception in accepting new client socket", e);
             }
         });
     }
@@ -60,7 +63,7 @@ public class JavaSocketServerConnector implements Closeable {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new UncheckedIOException("exception in closing server socket", e);
         }
     }
 
@@ -93,7 +96,12 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void run() {
-
+            try {
+                DatabaseCommand command = new CommandReader(new RespReader(client.getInputStream()), server.getEnv()).readCommand();
+                new RespWriter(client.getOutputStream()).write(command.execute().serialize());
+            } catch (IOException e) {
+                throw new UncheckedIOException("exception in running command from client", e);
+            }
         }
 
         /**
@@ -101,7 +109,11 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void close() {
-
+            try {
+                client.close();
+            } catch (IOException e) {
+                throw new UncheckedIOException("exception in closing client socket command", e);
+            }
         }
     }
 }

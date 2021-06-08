@@ -7,6 +7,7 @@ import com.itmo.java.protocol.model.RespArray;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.Socket;
 
 /**
@@ -21,7 +22,7 @@ public class SocketKvsConnection implements KvsConnection {
         try {
             socket = new Socket(config.getHost(), config.getPort());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new UncheckedIOException("exception in creating new connection socket", e);
         }
     }
 
@@ -33,12 +34,6 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
-        if (config.getHost() == null){
-            throw new ConnectionException("Host is null");
-        }
-        if (config.getPort() == 0){
-            throw new ConnectionException("Host is null");
-        }
         try {
             RespWriter writeCommand = new RespWriter(socket.getOutputStream());
             writeCommand.write(command);
@@ -57,7 +52,7 @@ public class SocketKvsConnection implements KvsConnection {
         try {
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new UncheckedIOException("exception in closing connection socket", e);
         }
     }
 }

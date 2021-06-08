@@ -61,7 +61,6 @@ public class JavaSocketServerConnector implements Closeable {
             try {
                 Socket clientSocket = serverSocket.accept();
                 ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
-                clientTask.run();
                 clientIOWorkers.submit(clientTask);
             } catch (IOException e) {
                 throw new UncheckedIOException("exception in accepting new client socket", e);
@@ -136,6 +135,7 @@ public class JavaSocketServerConnector implements Closeable {
                 DatabaseCommand command = new CommandReader(new RespReader(client.getInputStream()), server.getEnv()).readCommand();
                 RespArray result = new RespArray(command.execute().serialize());
                 new RespWriter(client.getOutputStream()).write(result);
+                close();
             } catch (IOException e) {
                 throw new UncheckedIOException("exception in running command from client", e);
             }

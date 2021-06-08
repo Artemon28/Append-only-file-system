@@ -180,6 +180,7 @@ public class RespReader implements AutoCloseable {
             byte[] commandId3 = is.readNBytes(1);
             byte[] commandId4 = is.readNBytes(1);
             int commandId = ((commandId1[0] << 24) + (commandId2[0]<< 16) + (commandId3[0] << 8) + (commandId4[0] << 0));
+            readCompareByte(CR);
             readCompareByte(LF);
             return new RespCommandId(commandId);
         } catch (IOException e) {

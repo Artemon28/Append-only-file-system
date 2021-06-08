@@ -175,11 +175,11 @@ public class RespReader implements AutoCloseable {
      */
     public RespCommandId readCommandId() throws IOException {
         try {
-            int commandId1 = is.read();
-            int commandId2 = is.read();
-            int commandId3 = is.read();
-            int commandId4 = is.read();
-            int commandId = ((commandId1 << 24) + (commandId2 << 16) + (commandId3 << 8) + (commandId4 << 0));
+            byte[] commandId1 = is.readNBytes(1);
+            byte[] commandId2 = is.readNBytes(1);
+            byte[] commandId3 = is.readNBytes(1);
+            byte[] commandId4 = is.readNBytes(1);
+            int commandId = ((commandId1[0] << 24) + (commandId2[0]<< 16) + (commandId3[0] << 8) + (commandId4[0] << 0));
             readCompareByte(LF);
             return new RespCommandId(commandId);
         } catch (IOException e) {

@@ -61,6 +61,7 @@ public class JavaSocketServerConnector implements Closeable {
             try {
                 Socket clientSocket = serverSocket.accept();
                 ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
+                clientTask.run();
                 clientIOWorkers.submit(clientTask);
             } catch (IOException e) {
                 throw new UncheckedIOException("exception in accepting new client socket", e);
@@ -104,6 +105,7 @@ public class JavaSocketServerConnector implements Closeable {
         list[3] = (new RespBulkString("laba6tabletest".getBytes(StandardCharsets.UTF_8)));
         RespObject ans = sss.send(1, new RespArray(list));
         System.out.println(ans.asString());
+        j.close();
     }
 
     /**

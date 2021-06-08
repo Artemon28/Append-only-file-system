@@ -37,8 +37,7 @@ public class SocketKvsConnection implements KvsConnection {
         try {
             RespWriter writeCommand = new RespWriter(socket.getOutputStream());
             writeCommand.write(command);
-            RespObject answerFromServer = new RespReader(socket.getInputStream()).readArray();
-            return answerFromServer;
+            return new RespReader(socket.getInputStream()).readArray();
         } catch (IOException e) {
             throw new ConnectionException("yes", e);
         }

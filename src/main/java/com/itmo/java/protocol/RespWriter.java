@@ -16,13 +16,7 @@ public class RespWriter implements AutoCloseable{
      * Записывает в output stream объект
      */
     public void write(RespObject object) throws IOException {
-        try{
-            object.write(os);
-        } catch (IOException e){
-            os.close();
-            throw new IOException("IO exception in writing object", e);
-        }
-
+        object.write(os);
     }
 
     @Override

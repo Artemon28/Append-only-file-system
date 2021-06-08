@@ -35,15 +35,12 @@ public class RespCommandId implements RespObject {
 
     @Override
     public void write(OutputStream os) throws IOException {
-        try{
-            os.write(CODE);
-            os.write((commandId >>> 24) & 0xFF);
-            os.write((commandId >>> 16) & 0xFF);
-            os.write((commandId >>>  8) & 0xFF);
-            os.write((commandId >>>  0) & 0xFF);
-            os.write(CRLF);
-        } catch (IOException e){
-            throw new IOException("IO exception in writing command id", e);
-        }
+        os.write(CODE);
+        os.write((commandId >>> 24) & 0xFF);
+        os.write((commandId >>> 16) & 0xFF);
+        os.write((commandId >>>  8) & 0xFF);
+        os.write((commandId >>>  0) & 0xFF);
+        os.write(CRLF);
+
     }
 }

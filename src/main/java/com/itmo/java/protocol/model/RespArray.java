@@ -48,7 +48,7 @@ public class RespArray implements RespObject {
 
     @Override
     public void write(OutputStream os) throws IOException {
-        try(os) {
+        try {
             os.write(CODE);
             os.write(Integer.toString(listObjects.size()).getBytes(StandardCharsets.UTF_8));
             os.write(CRLF);
@@ -56,6 +56,7 @@ public class RespArray implements RespObject {
                 object.write(os);
             }
         } catch (IOException e){
+            os.close();
             throw new IOException("IO exeption in writing array", e);
         }
     }

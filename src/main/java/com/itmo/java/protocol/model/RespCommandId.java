@@ -35,7 +35,7 @@ public class RespCommandId implements RespObject {
 
     @Override
     public void write(OutputStream os) throws IOException {
-        try(os){
+        try{
             os.write(CODE);
             os.write((commandId >>> 24) & 0xFF);
             os.write((commandId >>> 16) & 0xFF);

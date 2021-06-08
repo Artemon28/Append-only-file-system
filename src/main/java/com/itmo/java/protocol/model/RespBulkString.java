@@ -55,25 +55,20 @@ public class RespBulkString implements RespObject {
 
     @Override
     public void write(OutputStream os) throws IOException {
-        if (data == null){
-            try(os){
-                os.write(CODE);
+        try{
+            os.write(CODE);
+            if (data == null){
                 os.write(Integer.toString(NULL_STRING_SIZE).getBytes(StandardCharsets.UTF_8));
                 os.write(CRLF);
-            } catch (IOException e){
-                throw new IOException("IO exeption in writing bulkstring", e);
-            }
-        } else {
-            try(os){
-                os.write(CODE);
+
+            } else {
                 os.write(Integer.toString(data.length).getBytes(StandardCharsets.UTF_8));
                 os.write(CRLF);
                 os.write(data);
                 os.write(CRLF);
-            } catch (IOException e){
-                throw new IOException("IO exeption in writing bulkstring", e);
             }
+        } catch (IOException e){
+            throw new IOException("IO exeption in writing bulkstring", e);
         }
-
     }
 }

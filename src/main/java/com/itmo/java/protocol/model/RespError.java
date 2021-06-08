@@ -41,7 +41,7 @@ public class RespError implements RespObject {
 
     @Override
     public void write(OutputStream os) throws IOException {
-        try(os){
+        try{
             os.write(CODE);
             os.write(message);
             os.write(CRLF);

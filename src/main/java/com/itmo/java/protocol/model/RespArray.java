@@ -48,15 +48,15 @@ public class RespArray implements RespObject {
 
     @Override
     public void write(OutputStream os) throws IOException {
-        try(os) {
+        try {
             os.write(CODE);
             os.write(Integer.toString(listObjects.size()).getBytes(StandardCharsets.UTF_8));
             os.write(CRLF);
+            for (RespObject object : listObjects) {
+                object.write(os);
+            }
         } catch (IOException e){
             throw new IOException("IO exeption in writing array", e);
-        }
-        for (RespObject object : listObjects) {
-            object.write(os);
         }
     }
 

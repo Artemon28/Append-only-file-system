@@ -14,6 +14,7 @@ import com.itmo.java.basics.initialization.impl.TableInitializer;
 import com.itmo.java.basics.resp.CommandReader;
 import com.itmo.java.client.connection.ConnectionConfig;
 import com.itmo.java.client.connection.SocketKvsConnection;
+import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
 import com.itmo.java.protocol.model.RespArray;
@@ -103,9 +104,16 @@ public class JavaSocketServerConnector implements Closeable {
         list[2] = (new RespBulkString("zzz".getBytes(StandardCharsets.UTF_8)));
         list[3] = (new RespBulkString("laba6tabletest".getBytes(StandardCharsets.UTF_8)));
         RespObject ans = sss.send(1, new RespArray(list));
-        RespObject ans1 = sss.send(2, new RespArray(list));
+        sss.close();
+        try{
+            RespObject ans1 = sss.send(2, new RespArray(list));
+            System.out.println(ans1.asString());
+        } catch (ConnectionException e){
+
+        }
+
         System.out.println(ans.asString());
-        System.out.println(ans1.asString());
+
         j.close();
     }
 
@@ -134,6 +142,9 @@ public class JavaSocketServerConnector implements Closeable {
         @Override
         public void run() {
             try {
+                if (client.isClosed()){
+                    return;
+                }
                 DatabaseCommand command = new CommandReader(new RespReader(client.getInputStream()), server.getEnv()).readCommand();
                 RespArray result = new RespArray(command.execute().serialize());
                 new RespWriter(client.getOutputStream()).write(result);

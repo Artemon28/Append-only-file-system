@@ -191,9 +191,6 @@ public class RespReader implements AutoCloseable {
     private void readCompareByte(byte compareWith) throws IOException {
         byte[] nextByte;
         try {
-            if (is.available() == 0){
-                throw new IOException("end of the stream");
-            }
             nextByte = is.readNBytes(1);
             if (nextByte.length == 0){
                 throw new EOFException("end of the stream");

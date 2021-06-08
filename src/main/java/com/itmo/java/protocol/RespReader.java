@@ -62,9 +62,9 @@ public class RespReader implements AutoCloseable {
             if(firstSymbol[0] == RespCommandId.CODE){
                 return readCommandId();
             }
-            throw new IOException("unknow byte" + new String(firstSymbol));
+            throw new IOException("unknown byte" + new String(firstSymbol));
         } catch (IOException e){
-            throw new IOException("can't read first symbol", e);
+            throw new IOException("exception in reading object", e);
         }
     }
 
@@ -175,7 +175,11 @@ public class RespReader implements AutoCloseable {
      */
     public RespCommandId readCommandId() throws IOException {
         try {
-            int commandId = is.read();
+            int commandId1 = is.read();
+            int commandId2 = is.read();
+            int commandId3 = is.read();
+            int commandId4 = is.read();
+            int commandId = ((commandId1 << 24) + (commandId2 << 16) + (commandId3 << 8) + (commandId4 << 0));
             readCompareByte(LF);
             return new RespCommandId(commandId);
         } catch (IOException e) {

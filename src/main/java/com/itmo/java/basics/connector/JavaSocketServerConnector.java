@@ -1,11 +1,24 @@
 package com.itmo.java.basics.connector;
 
 import com.itmo.java.basics.DatabaseServer;
+import com.itmo.java.basics.config.ConfigLoader;
+import com.itmo.java.basics.config.DatabaseConfig;
 import com.itmo.java.basics.config.ServerConfig;
 import com.itmo.java.basics.console.DatabaseCommand;
+import com.itmo.java.basics.console.ExecutionEnvironment;
+import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
+import com.itmo.java.basics.initialization.impl.DatabaseInitializer;
+import com.itmo.java.basics.initialization.impl.DatabaseServerInitializer;
+import com.itmo.java.basics.initialization.impl.SegmentInitializer;
+import com.itmo.java.basics.initialization.impl.TableInitializer;
 import com.itmo.java.basics.resp.CommandReader;
+import com.itmo.java.client.connection.ConnectionConfig;
+import com.itmo.java.client.connection.SocketKvsConnection;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
+import com.itmo.java.protocol.model.RespArray;
+import com.itmo.java.protocol.model.RespBulkString;
+import com.itmo.java.protocol.model.RespCommandId;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.io.Closeable;
@@ -13,6 +26,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,7 +35,6 @@ import java.util.concurrent.Executors;
  */
 public class JavaSocketServerConnector implements Closeable {
     private final DatabaseServer databaseServer;
-    private final ServerConfig config;
 
     /**
      * Экзекьютор для выполнения ClientTask
@@ -37,7 +50,6 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public JavaSocketServerConnector(DatabaseServer databaseServer, ServerConfig config) throws IOException {
         this.databaseServer = databaseServer;
-        this.config = config;
         serverSocket = new ServerSocket(config.getPort());
     }
  
@@ -48,7 +60,9 @@ public class JavaSocketServerConnector implements Closeable {
         connectionAcceptorExecutor.submit(() -> {
             try {
                 Socket clientSocket = serverSocket.accept();
-                clientIOWorkers.submit(new ClientTask(clientSocket, databaseServer));
+                ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
+                clientTask.run();
+                clientIOWorkers.submit(clientTask);
             } catch (IOException e) {
                 close();
                 throw new UncheckedIOException("exception in accepting new client socket", e);
@@ -73,7 +87,24 @@ public class JavaSocketServerConnector implements Closeable {
 
 
     public static void main(String[] args) throws Exception {
-        // можнно запускать прямо здесь
+        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
+        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
+        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
+        DatabaseServerInitializer initializer =
+                new DatabaseServerInitializer(
+                        new DatabaseInitializer(
+                                new TableInitializer(
+                                        new SegmentInitializer())));
+        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
+        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
+        j.start();
+        SocketKvsConnection sss = new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()));
+        RespObject[] list = new RespObject[4];
+        list[0] = (new RespCommandId(1));
+        list[1] = (new RespBulkString("CREATE_TABLE".getBytes(StandardCharsets.UTF_8)));
+        list[2] = (new RespBulkString("zzz".getBytes(StandardCharsets.UTF_8)));
+        list[3] = (new RespBulkString("laba6tabletest".getBytes(StandardCharsets.UTF_8)));
+        RespObject ans = sss.send(1, new RespArray(list));
     }
 
     /**

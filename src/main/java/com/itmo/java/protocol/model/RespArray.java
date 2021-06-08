@@ -55,8 +55,8 @@ public class RespArray implements RespObject {
         } catch (IOException e){
             throw new IOException("IO exeption in writing array", e);
         }
-        for (RespObject listObject : listObjects) {
-            listObject.write(os);
+        for (RespObject object : listObjects) {
+            object.write(os);
         }
     }
 

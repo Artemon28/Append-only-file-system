@@ -171,13 +171,9 @@ public class RespReader implements AutoCloseable {
      * @throws IOException  при ошибке чтения
      */
     public RespCommandId readCommandId() throws IOException {
-        try {
-            int commandId = readInt();
-            readCompareByte(LF);
-            return new RespCommandId(commandId);
-        } catch (IOException e) {
-            throw new IOException("IO exception in reading command id", e);
-        }
+        int commandId = readInt();
+        readCompareByte(LF);
+        return new RespCommandId(commandId);
     }
 
     private byte[] readCompareByte(byte compareWith) throws IOException {

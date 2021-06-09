@@ -14,13 +14,15 @@ import java.net.Socket;
  * С помощью {@link RespWriter} и {@link RespReader} читает/пишет в сокет
  */
 public class SocketKvsConnection implements KvsConnection {
-    private ConnectionConfig config;
     Socket socket;
+    private RespReader reader;
+    private RespWriter writer;
 
     public SocketKvsConnection(ConnectionConfig config) {
-        this.config = config;
         try {
             socket = new Socket(config.getHost(), config.getPort());
+            reader = new RespReader(socket.getInputStream());
+            writer = new RespWriter(this.socket.getOutputStream());
         } catch (IOException e) {
             throw new UncheckedIOException("exception in creating new connection socket", e);
         }
@@ -34,17 +36,12 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
-//        try {
-//            if (socket.isClosed()){
-//                throw new ConnectionException("closed");
-//            }
-//            RespWriter writeCommand = new RespWriter(socket.getOutputStream());
-//            writeCommand.write(command);
-//            return new RespReader(socket.getInputStream()).readArray();
-//        } catch (IOException e) {
-//            throw new ConnectionException("yes", e);
-//        }
-        return null;
+        try {
+            writer.write(command);
+            return reader.readArray();
+        } catch (IOException e) {
+            throw new ConnectionException("yes", e);
+        }
     }
 
     /**
@@ -53,6 +50,8 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public void close() {
         try {
+            writer.close();
+            reader.close();
             socket.close();
         } catch (IOException e) {
             throw new UncheckedIOException("exception in closing connection socket", e);

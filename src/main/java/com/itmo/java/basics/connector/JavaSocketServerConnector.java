@@ -23,10 +23,7 @@ import com.itmo.java.client.connection.SocketKvsConnection;
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
-import com.itmo.java.protocol.model.RespArray;
-import com.itmo.java.protocol.model.RespBulkString;
-import com.itmo.java.protocol.model.RespCommandId;
-import com.itmo.java.protocol.model.RespObject;
+import com.itmo.java.protocol.model.*;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -163,6 +160,11 @@ public class JavaSocketServerConnector implements Closeable {
                     writer.write(result);
                 }
             } catch (Exception e) {
+                try {
+                    writer.write(new RespError("vse slomalos".getBytes(StandardCharsets.UTF_8)));
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
                 e.printStackTrace();
             }
         }

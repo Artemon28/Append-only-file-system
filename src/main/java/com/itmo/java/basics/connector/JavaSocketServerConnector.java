@@ -103,19 +103,25 @@ public class JavaSocketServerConnector implements Closeable {
                                         new SegmentInitializer())));
         DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
         JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
-//        databaseServer.executeNextCommand();
         j.start();
         RespObject q;
         try(SocketKvsConnection socketKvsConnection =
                     new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
-            KvsCommand k = new CreateDatabaseKvsCommand("t1");
-            q = socketKvsConnection.send(k.getCommandId(), k.serialize());
-            System.out.println(q.asString());
-            q = socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
-            System.out.println(q.asString());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "value1").serialize());
-            System.out.println(q.asString());
-            q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "qwerty").serialize());
+//            KvsCommand k = new CreateDatabaseKvsCommand("t1");
+//            q = socketKvsConnection.send(k.getCommandId(), k.serialize());
+//            System.out.println(q.asString());
+//            q = socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
+//            System.out.println(q.asString());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "qwertyuiolk,mjnhgfdsdfghjklkjhgf").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key2", ",lkjhgfdcfvbghnjmki").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key3", "KEKW OMEGALUL").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "djbetrhrtnij 6yj ur jy dy jyd").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key4", "hjlhui redtybrtui yuk tyrj yt r").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+//            System.out.println(q.asString());
+            q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "key1").serialize());
             System.out.println(q.asString());
             q = socketKvsConnection.send(1, new DeleteKvsCommand("t1", "da", "aaa").serialize());
 

@@ -20,12 +20,10 @@ import java.nio.charset.StandardCharsets;
  */
 public class SocketKvsConnection implements KvsConnection {
     Socket socket;
-    private  final ConnectionConfig config;
-    private RespReader reader;
-    private RespWriter writer;
+    private final RespReader reader;
+    private final RespWriter writer;
 
     public SocketKvsConnection(ConnectionConfig config) {
-        this.config = config;
         try {
             socket = new Socket(config.getHost(), config.getPort());
             reader = new RespReader(socket.getInputStream());

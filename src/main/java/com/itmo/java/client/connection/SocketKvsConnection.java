@@ -31,7 +31,7 @@ public class SocketKvsConnection implements KvsConnection {
             reader = new RespReader(socket.getInputStream());
             writer = new RespWriter(this.socket.getOutputStream());
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new UncheckedIOException(e.getMessage(), e);
         }
     }
 

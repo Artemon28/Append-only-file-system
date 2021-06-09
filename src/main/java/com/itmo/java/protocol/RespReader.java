@@ -160,6 +160,7 @@ public class RespReader implements AutoCloseable {
             for (int i = 0; i < arraySize; i++){
                 listObjects[i] = readObject();
             }
+            isHasArray = false;
             return new RespArray(listObjects);
         } catch (IOException e) {
             throw new IOException("IO exception in reading Array", e);

@@ -116,9 +116,6 @@ public class JavaSocketServerConnector implements Closeable {
         try(SocketKvsConnection socketKvsConnection =
                     new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
             socketKvsConnection.send(1, new CreateDatabaseKvsCommand("t1").serialize());
-        }
-        try(SocketKvsConnection socketKvsConnection =
-                    new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
             socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
             socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "value1").serialize());
             q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "key1").serialize());
@@ -162,7 +159,7 @@ public class JavaSocketServerConnector implements Closeable {
         public void run() {
             try {
                 CommandReader commandReader = new CommandReader(reader, server.getEnv());
-                while (!client.isClosed()) {
+                while (true) {
                     if (commandReader.hasNextCommand()) {
                         DatabaseCommand command = commandReader.readCommand();
                         RespArray result = new RespArray(command.execute().serialize());

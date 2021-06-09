@@ -63,8 +63,7 @@ public class SetKeyCommand implements DatabaseCommand {
         if (previous.isEmpty()){
             return DatabaseCommandResult.success(null);
         }
-        System.out.println(new String(previous.get()).getBytes(StandardCharsets.UTF_8));
-        return DatabaseCommandResult.success(("previous value was " + new String(previous.get())).getBytes(StandardCharsets.UTF_8));
+        return DatabaseCommandResult.success(("set previous value was " + new String(previous.get())).getBytes(StandardCharsets.UTF_8));
 
     }
 }

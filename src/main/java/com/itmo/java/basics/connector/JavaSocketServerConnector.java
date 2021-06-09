@@ -122,7 +122,6 @@ public class JavaSocketServerConnector implements Closeable {
      * Runnable, описывающий исполнение клиентской команды.
      */
     static class ClientTask implements Runnable, Closeable {
-        private final Socket client;
         private final DatabaseServer server;
         private RespReader reader;
         private RespWriter writer;
@@ -131,11 +130,10 @@ public class JavaSocketServerConnector implements Closeable {
          * @param server сервер, на котором исполняется задача
          */
         public ClientTask(Socket client, DatabaseServer server) {
-            this.client = client;
             this.server = server;
             try {
                 reader = new RespReader(client.getInputStream());
-                writer = new RespWriter(this.client.getOutputStream());
+                writer = new RespWriter(client.getOutputStream());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -167,7 +165,6 @@ public class JavaSocketServerConnector implements Closeable {
             try {
                 reader.close();
                 writer.close();
-                client.close();
             } catch (IOException e) {
                 throw new UncheckedIOException("exception in closing client socket command", e);
             }

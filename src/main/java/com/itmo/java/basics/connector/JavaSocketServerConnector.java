@@ -6,6 +6,7 @@ import com.itmo.java.basics.config.DatabaseConfig;
 import com.itmo.java.basics.config.ServerConfig;
 import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandResult;
+import com.itmo.java.basics.console.DatabaseCommands;
 import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
 import com.itmo.java.basics.initialization.impl.DatabaseInitializer;
@@ -14,10 +15,7 @@ import com.itmo.java.basics.initialization.impl.SegmentInitializer;
 import com.itmo.java.basics.initialization.impl.TableInitializer;
 import com.itmo.java.basics.resp.CommandReader;
 import com.itmo.java.client.client.SimpleKvsClient;
-import com.itmo.java.client.command.CreateDatabaseKvsCommand;
-import com.itmo.java.client.command.CreateTableKvsCommand;
-import com.itmo.java.client.command.GetKvsCommand;
-import com.itmo.java.client.command.SetKvsCommand;
+import com.itmo.java.client.command.*;
 import com.itmo.java.client.connection.ConnectionConfig;
 import com.itmo.java.client.connection.KvsConnection;
 import com.itmo.java.client.connection.SocketKvsConnection;
@@ -33,10 +31,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 /**
@@ -112,7 +107,8 @@ public class JavaSocketServerConnector implements Closeable {
         RespObject q;
         try(SocketKvsConnection socketKvsConnection =
                     new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
-            q = socketKvsConnection.send(1, new CreateDatabaseKvsCommand("t1").serialize());
+            KvsCommand k = new CreateDatabaseKvsCommand("t1");
+            q = socketKvsConnection.send(k.getCommandId(), k.serialize());
             System.out.println(q.asString());
             q = socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
             System.out.println(q.asString());
@@ -160,11 +156,12 @@ public class JavaSocketServerConnector implements Closeable {
             try(CommandReader commandReader = new CommandReader(reader, server.getEnv())) {
                 while (commandReader.hasNextCommand()) {
                     DatabaseCommand command = commandReader.readCommand();
-                    DatabaseCommandResult databaseCommandResult = server.executeNextCommand(command).get();
-                    writer.write(databaseCommandResult.serialize());
+                    CompletableFuture<DatabaseCommandResult> databaseCommandFuture = server.executeNextCommand(command);
+                    writer.write(command.execute().serialize());
                 }
+                close();
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new UncheckedIOException("qqq", new IOException("da"));
             }
         }
 

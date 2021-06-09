@@ -33,6 +33,9 @@ public class RespReader implements AutoCloseable {
             return true;
         }
         byte[] currentRespObjectType = is.readNBytes(1);
+        if (currentRespObjectType.length == 0){
+            throw new EOFException("end of the stream");
+        }
         if (currentRespObjectType[0] == RespArray.CODE){
             isHasArray = true;
             return true;

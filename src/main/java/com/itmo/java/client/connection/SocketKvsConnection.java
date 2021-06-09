@@ -31,7 +31,7 @@ public class SocketKvsConnection implements KvsConnection {
             reader = new RespReader(socket.getInputStream());
             writer = new RespWriter(this.socket.getOutputStream());
         } catch (IOException e) {
-            throw new UncheckedIOException("exception in creating new connection socket", e);
+            //throw new UncheckedIOException("exception in creating new connection socket", e);
         }
     }
 

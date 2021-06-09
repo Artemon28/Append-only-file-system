@@ -60,7 +60,7 @@ public class DeleteKeyCommand implements DatabaseCommand {
         if (previous.isEmpty()){
             return DatabaseCommandResult.error("nothing to delete");
         }
-        System.out.println(new String(previous.get()).getBytes(StandardCharsets.UTF_8));
+        System.out.println(new String(previous.get()));
         return DatabaseCommandResult.success(("previous value was " + new String(previous.get())).getBytes(StandardCharsets.UTF_8));
     }
 }

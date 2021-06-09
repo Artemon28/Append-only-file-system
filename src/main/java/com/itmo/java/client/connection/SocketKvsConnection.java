@@ -44,26 +44,12 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
-            while (!Thread.currentThread().isInterrupted() && !socket.isClosed()) {
-                writer.write(command);
-                if (reader.hasArray()) {
-                    return reader.readArray();
-                } else {
-                    reader.close();
-                    break;
-                }
-            }
-            return null;
+            writer.write(command);
+            //DatabaseCommandResult result = new SuccessDatabaseCommandResult(reader.readArray().asString().getBytes(StandardCharsets.UTF_8));
+            return reader.readArray();
         } catch (IOException e) {
             throw new ConnectionException("yes", e);
         }
-//        try {
-//            writer.write(command);
-//            //DatabaseCommandResult result = new SuccessDatabaseCommandResult(reader.readArray().asString().getBytes(StandardCharsets.UTF_8));
-//            return reader.readArray();
-//        } catch (IOException e) {
-//            throw new ConnectionException("yes", e);
-//        }
     }
 
     /**

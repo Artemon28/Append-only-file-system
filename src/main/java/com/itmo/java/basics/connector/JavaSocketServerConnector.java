@@ -84,8 +84,8 @@ public class JavaSocketServerConnector implements Closeable {
     public void close() {
         System.out.println("Stopping socket connector");
         try {
-            //clientIOWorkers.shutdown();
-            //connectionAcceptorExecutor.shutdown();
+            clientIOWorkers.shutdownNow();
+            connectionAcceptorExecutor.shutdownNow();
             serverSocket.close();
         } catch (IOException e) {
             throw new UncheckedIOException("exception in closing server socket", e);

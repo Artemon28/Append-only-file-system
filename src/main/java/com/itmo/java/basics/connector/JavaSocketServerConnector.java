@@ -59,13 +59,13 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
-            try {
-                Socket clientSocket = serverSocket.accept();
-                ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
-                clientIOWorkers.submit(clientTask);
-            } catch (IOException e) {
-                throw new UncheckedIOException("exception in accepting new client socket", e);
-            }
+//            try {
+//                Socket clientSocket = serverSocket.accept();
+//                ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
+//                clientIOWorkers.submit(clientTask);
+//            } catch (IOException e) {
+//                throw new UncheckedIOException("exception in accepting new client socket", e);
+//            }
         });
     }
 
@@ -141,16 +141,16 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void run() {
-            try {
-                if (client.isClosed()){
-                    return;
-                }
-                DatabaseCommand command = new CommandReader(new RespReader(client.getInputStream()), server.getEnv()).readCommand();
-                RespArray result = new RespArray(command.execute().serialize());
-                new RespWriter(client.getOutputStream()).write(result);
-            } catch (IOException e) {
-                throw new UncheckedIOException("exception in running command from client", e);
-            }
+//            try {
+//                if (client.isClosed()){
+//                    return;
+//                }
+//                DatabaseCommand command = new CommandReader(new RespReader(client.getInputStream()), server.getEnv()).readCommand();
+//                RespArray result = new RespArray(command.execute().serialize());
+//                new RespWriter(client.getOutputStream()).write(result);
+//            } catch (IOException e) {
+//                throw new UncheckedIOException("exception in running command from client", e);
+//            }
         }
 
         /**

@@ -34,16 +34,17 @@ public class SocketKvsConnection implements KvsConnection {
      */
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
-        try {
-            if (socket.isClosed()){
-                throw new ConnectionException("closed");
-            }
-            RespWriter writeCommand = new RespWriter(socket.getOutputStream());
-            writeCommand.write(command);
-            return new RespReader(socket.getInputStream()).readArray();
-        } catch (IOException e) {
-            throw new ConnectionException("yes", e);
-        }
+//        try {
+//            if (socket.isClosed()){
+//                throw new ConnectionException("closed");
+//            }
+//            RespWriter writeCommand = new RespWriter(socket.getOutputStream());
+//            writeCommand.write(command);
+//            return new RespReader(socket.getInputStream()).readArray();
+//        } catch (IOException e) {
+//            throw new ConnectionException("yes", e);
+//        }
+        return null;
     }
 
     /**

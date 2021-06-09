@@ -8,6 +8,7 @@ import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,6 +63,7 @@ public class SetKeyCommand implements DatabaseCommand {
         if (previous.isEmpty()){
             return DatabaseCommandResult.success(null);
         }
+        System.out.println(Arrays.toString(new String(previous.get()).getBytes(StandardCharsets.UTF_8)));
         return DatabaseCommandResult.success(("previous value was " + new String(previous.get())).getBytes(StandardCharsets.UTF_8));
 
     }

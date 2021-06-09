@@ -103,6 +103,7 @@ public class JavaSocketServerConnector implements Closeable {
                                         new SegmentInitializer())));
         DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
         JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
+//        databaseServer.executeNextCommand();
         j.start();
         RespObject q;
         try(SocketKvsConnection socketKvsConnection =
@@ -156,14 +157,24 @@ public class JavaSocketServerConnector implements Closeable {
          */
         @Override
         public void run() {
-            try(CommandReader commandReader = new CommandReader(reader, server.getEnv())) {
+            try {
+                CommandReader commandReader = new CommandReader(reader, server.getEnv());
                 while (commandReader.hasNextCommand()) {
                     DatabaseCommand command = commandReader.readCommand();
+                    try {
+                        DatabaseCommandResult t = server.executeNextCommand(command).get();
+                        writer.write(t.serialize());
+                    } catch (InterruptedException e){
+                        writer.write(command.execute().serialize());
+                    }
                     //CompletableFuture<DatabaseCommandResult> databaseCommandFuture = server.executeNextCommand(command);
-                    writer.write(command.execute().serialize());
+                    //writer.write(server.executeNextCommand(command).get().serialize());
                 }
                 close();
-            } catch (Exception e) {
+            } catch (ExecutionException e1) {
+                e1.printStackTrace();
+            } catch (Exception e2) {
+                e2.printStackTrace();
                 throw new UncheckedIOException("qqq", new IOException("da"));
             }
         }

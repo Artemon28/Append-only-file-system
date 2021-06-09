@@ -55,9 +55,7 @@ public class DatabaseServer {
     }
 
     public CompletableFuture<DatabaseCommandResult> executeNextCommand(DatabaseCommand command) {
-        return CompletableFuture.supplyAsync(() -> {
-            return command.execute();
-        }, executorService);
+        return CompletableFuture.supplyAsync(() -> command.execute(), executorService);
     }
 
     public ExecutionEnvironment getEnv() {

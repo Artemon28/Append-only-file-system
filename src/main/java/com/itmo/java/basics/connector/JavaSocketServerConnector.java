@@ -37,6 +37,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -69,8 +70,10 @@ public class JavaSocketServerConnector implements Closeable {
         connectionAcceptorExecutor.submit(() -> {
             try {
                 Socket clientSocket = serverSocket.accept();
-                ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
-                clientIOWorkers.submit(clientTask);
+                clientIOWorkers.submit(() -> {
+                    ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
+                    clientTask.run();
+                });
             } catch (IOException e) {
                 throw new UncheckedIOException("exception in accepting new client socket", e);
             }
@@ -84,6 +87,7 @@ public class JavaSocketServerConnector implements Closeable {
     public void close() {
         System.out.println("Stopping socket connector");
         try {
+            clientIOWorkers.shutdownNow();
             connectionAcceptorExecutor.shutdownNow();
             serverSocket.close();
         } catch (IOException e) {
@@ -122,6 +126,8 @@ public class JavaSocketServerConnector implements Closeable {
      * Runnable, описывающий исполнение клиентской команды.
      */
     static class ClientTask implements Runnable, Closeable {
+
+        private final Socket client;
         private final DatabaseServer server;
         private RespReader reader;
         private RespWriter writer;
@@ -130,6 +136,7 @@ public class JavaSocketServerConnector implements Closeable {
          * @param server сервер, на котором исполняется задача
          */
         public ClientTask(Socket client, DatabaseServer server) {
+            this.client = client;
             this.server = server;
             try {
                 reader = new RespReader(client.getInputStream());
@@ -165,6 +172,7 @@ public class JavaSocketServerConnector implements Closeable {
             try {
                 reader.close();
                 writer.close();
+                client.close();
             } catch (IOException e) {
                 throw new UncheckedIOException("exception in closing client socket command", e);
             }

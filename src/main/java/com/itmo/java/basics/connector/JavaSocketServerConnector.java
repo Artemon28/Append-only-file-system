@@ -115,6 +115,9 @@ public class JavaSocketServerConnector implements Closeable {
             q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "value1").serialize());
             System.out.println(q.asString());
             q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "qwerty").serialize());
+            System.out.println(q.asString());
+            q = socketKvsConnection.send(1, new DeleteKvsCommand("t1", "da", "aaa").serialize());
+
         }
         System.out.println(q.asString());
         j.close();
@@ -156,7 +159,7 @@ public class JavaSocketServerConnector implements Closeable {
             try(CommandReader commandReader = new CommandReader(reader, server.getEnv())) {
                 while (commandReader.hasNextCommand()) {
                     DatabaseCommand command = commandReader.readCommand();
-                    CompletableFuture<DatabaseCommandResult> databaseCommandFuture = server.executeNextCommand(command);
+                    //CompletableFuture<DatabaseCommandResult> databaseCommandFuture = server.executeNextCommand(command);
                     writer.write(command.execute().serialize());
                 }
                 close();

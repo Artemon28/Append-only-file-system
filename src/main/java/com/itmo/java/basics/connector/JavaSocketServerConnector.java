@@ -108,9 +108,7 @@ public class JavaSocketServerConnector implements Closeable {
                                 new TableInitializer(
                                         new SegmentInitializer())));
         DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
-
         JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
-
         j.start();
         RespObject q;
         try(SocketKvsConnection socketKvsConnection =
@@ -159,7 +157,7 @@ public class JavaSocketServerConnector implements Closeable {
         public void run() {
             try {
                 CommandReader commandReader = new CommandReader(reader, server.getEnv());
-                while (true) {
+                while (!client.isClosed()) {
                     if (commandReader.hasNextCommand()) {
                         DatabaseCommand command = commandReader.readCommand();
                         RespArray result = new RespArray(command.execute().serialize());

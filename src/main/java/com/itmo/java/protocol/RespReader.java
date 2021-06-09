@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 public class RespReader implements AutoCloseable {
     private final InputStream is;
     private boolean isHasArray = false;
+    private boolean isReadFirstSymbol = false;
 
     /**
      * Специальные символы окончания элемента
@@ -50,6 +51,7 @@ public class RespReader implements AutoCloseable {
     public RespObject readObject() throws IOException {
         try {
             byte[] firstSymbol = is.readNBytes(1);
+            isReadFirstSymbol = true;
             if (firstSymbol.length == 0){
                 throw new EOFException("end of the stream");
             }
@@ -102,6 +104,9 @@ public class RespReader implements AutoCloseable {
     public RespError readError() throws IOException {
         try{
             StringBuilder errorMessage = new StringBuilder();
+            if (isReadFirstSymbol){
+                errorMessage.append(String.valueOf(RespError.CODE));
+            }
             byte[] currentSymbol = is.readNBytes(1);
             if (currentSymbol.length == 0){
                 throw new EOFException("end of the stream");
@@ -114,6 +119,7 @@ public class RespReader implements AutoCloseable {
                 }
             }
             readCompareByte(LF);
+            isReadFirstSymbol = false;
             return new RespError(errorMessage.toString().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IOException("IO exception in reading Error", e);
@@ -136,6 +142,11 @@ public class RespReader implements AutoCloseable {
             byte[] bulkString = is.readNBytes(bulkSize);
             readCompareByte(CR);
             readCompareByte(LF);
+            if (isReadFirstSymbol){
+                String tempBulkString = new String(bulkString);
+                tempBulkString = String.valueOf(RespBulkString.CODE) + tempBulkString;
+                return new RespBulkString(tempBulkString.getBytes(StandardCharsets.UTF_8));
+            }
             return new RespBulkString(bulkString);
         } catch (IOException e) {
             throw new IOException("IO exception in reading Bulk String", e);

@@ -116,7 +116,7 @@ public class JavaSocketServerConnector implements Closeable {
             socketKvsConnection.send(1, new CreateDatabaseKvsCommand("t1").serialize());
             socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
             socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "value1").serialize());
-            q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "key1").serialize());
+            q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "qwerty").serialize());
         }
         System.out.println(q.asString());
         j.close();

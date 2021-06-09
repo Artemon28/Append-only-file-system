@@ -1,7 +1,9 @@
 package com.itmo.java.client.connection;
 
+import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.impl.SuccessDatabaseCommandResult;
+import com.itmo.java.basics.resp.CommandReader;
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
@@ -42,12 +44,26 @@ public class SocketKvsConnection implements KvsConnection {
     @Override
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
-            writer.write(command);
-            //DatabaseCommandResult result = new SuccessDatabaseCommandResult(reader.readArray().asString().getBytes(StandardCharsets.UTF_8));
-            return reader.readArray();
+            while (!Thread.currentThread().isInterrupted() && !socket.isClosed()) {
+                writer.write(command);
+                if (reader.hasArray()) {
+                    return reader.readArray();
+                } else {
+                    reader.close();
+                    break;
+                }
+            }
+            return null;
         } catch (IOException e) {
             throw new ConnectionException("yes", e);
         }
+//        try {
+//            writer.write(command);
+//            //DatabaseCommandResult result = new SuccessDatabaseCommandResult(reader.readArray().asString().getBytes(StandardCharsets.UTF_8));
+//            return reader.readArray();
+//        } catch (IOException e) {
+//            throw new ConnectionException("yes", e);
+//        }
     }
 
     /**

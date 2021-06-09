@@ -76,6 +76,8 @@ public class JavaSocketServerConnector implements Closeable {
                 });
             } catch (IOException e) {
                 throw new UncheckedIOException("exception in accepting new client socket", e);
+            } finally {
+                close();
             }
         });
     }
@@ -156,11 +158,19 @@ public class JavaSocketServerConnector implements Closeable {
         @Override
         public void run() {
             try {
-                DatabaseCommand command = new CommandReader(reader, server.getEnv()).readCommand();
-                RespArray result = new RespArray(command.execute().serialize());
-                writer.write(result);
-            } catch (IOException e) {
-                throw new UncheckedIOException("exception in running command from client", e);
+                CommandReader commandReader = new CommandReader(reader, server.getEnv());
+                while (!Thread.currentThread().isInterrupted() && !client.isClosed()) {
+                    if (commandReader.hasNextCommand()) {
+                        DatabaseCommand command = commandReader.readCommand();
+                        RespArray result = new RespArray(command.execute().serialize());
+                        writer.write(result);
+                    } else {
+                        reader.close();
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

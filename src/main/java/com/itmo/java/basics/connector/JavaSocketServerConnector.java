@@ -5,6 +5,7 @@ import com.itmo.java.basics.config.ConfigLoader;
 import com.itmo.java.basics.config.DatabaseConfig;
 import com.itmo.java.basics.config.ServerConfig;
 import com.itmo.java.basics.console.DatabaseCommand;
+import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
 import com.itmo.java.basics.initialization.impl.DatabaseInitializer;
@@ -34,6 +35,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -155,16 +157,10 @@ public class JavaSocketServerConnector implements Closeable {
             try(CommandReader commandReader = new CommandReader(reader, server.getEnv())) {
                 while (commandReader.hasNextCommand()) {
                     DatabaseCommand command = commandReader.readCommand();
-                    //RespArray result = new RespArray(command.execute().serialize());
-                    RespObject result = command.execute().serialize();
-                    writer.write(result);
+                    DatabaseCommandResult databaseCommandResult = server.executeNextCommand(command).get();
+                    writer.write(databaseCommandResult.serialize());
                 }
             } catch (Exception e) {
-//                try {
-//                    writer.write(new RespError("vse slomalos".getBytes(StandardCharsets.UTF_8)));
-//                } catch (IOException ioException) {
-//                    ioException.printStackTrace();
-//                }
                 e.printStackTrace();
             }
         }

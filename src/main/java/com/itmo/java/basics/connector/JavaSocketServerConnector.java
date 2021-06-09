@@ -12,7 +12,13 @@ import com.itmo.java.basics.initialization.impl.DatabaseServerInitializer;
 import com.itmo.java.basics.initialization.impl.SegmentInitializer;
 import com.itmo.java.basics.initialization.impl.TableInitializer;
 import com.itmo.java.basics.resp.CommandReader;
+import com.itmo.java.client.client.SimpleKvsClient;
+import com.itmo.java.client.command.CreateDatabaseKvsCommand;
+import com.itmo.java.client.command.CreateTableKvsCommand;
+import com.itmo.java.client.command.GetKvsCommand;
+import com.itmo.java.client.command.SetKvsCommand;
 import com.itmo.java.client.connection.ConnectionConfig;
+import com.itmo.java.client.connection.KvsConnection;
 import com.itmo.java.client.connection.SocketKvsConnection;
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
@@ -25,11 +31,13 @@ import com.itmo.java.protocol.model.RespObject;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 /**
  * Класс, который предоставляет доступ к серверу через сокеты
@@ -75,46 +83,40 @@ public class JavaSocketServerConnector implements Closeable {
     @Override
     public void close() {
         System.out.println("Stopping socket connector");
-        try {
-            clientIOWorkers.shutdown();
-            connectionAcceptorExecutor.shutdown();
-            serverSocket.close();
-        } catch (IOException e) {
-            throw new UncheckedIOException("exception in closing server socket", e);
-        }
+//        try {
+//            clientIOWorkers.shutdown();
+//            connectionAcceptorExecutor.shutdown();
+//            serverSocket.close();
+//        } catch (IOException e) {
+//            throw new UncheckedIOException("exception in closing server socket", e);
+//        }
     }
 
 
     public static void main(String[] args) throws Exception {
-//        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
-//        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
-//        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
-//        DatabaseServerInitializer initializer =
-//                new DatabaseServerInitializer(
-//                        new DatabaseInitializer(
-//                                new TableInitializer(
-//                                        new SegmentInitializer())));
-//        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
-//        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
-//        j.start();
-//        SocketKvsConnection sss = new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()));
-//        RespObject[] list = new RespObject[4];
-//        list[0] = (new RespCommandId(1));
-//        list[1] = (new RespBulkString("CREATE_TABLE".getBytes(StandardCharsets.UTF_8)));
-//        list[2] = (new RespBulkString("zzz".getBytes(StandardCharsets.UTF_8)));
-//        list[3] = (new RespBulkString("laba6tabletest".getBytes(StandardCharsets.UTF_8)));
-//        RespObject ans = sss.send(1, new RespArray(list));
-//        sss.close();
-//        try{
-//            RespObject ans1 = sss.send(2, new RespArray(list));
-//            System.out.println(ans1.asString());
-//        } catch (ConnectionException e){
-//
-//        }
-//
-//        System.out.println(ans.asString());
-//
-//        j.close();
+        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
+        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
+        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
+        DatabaseServerInitializer initializer =
+                new DatabaseServerInitializer(
+                        new DatabaseInitializer(
+                                new TableInitializer(
+                                        new SegmentInitializer())));
+        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
+
+        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
+
+        j.start();
+        RespObject q;
+        try(SocketKvsConnection socketKvsConnection =
+                    new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
+            socketKvsConnection.send(1, new CreateDatabaseKvsCommand("t1").serialize());
+            socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
+            socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "value1").serialize());
+            q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "key1").serialize());
+        }
+        System.out.println(q.asString());
+        j.close();
     }
 
     /**
@@ -150,9 +152,6 @@ public class JavaSocketServerConnector implements Closeable {
         @Override
         public void run() {
             try {
-                if (client.isClosed()){
-                    return;
-                }
                 DatabaseCommand command = new CommandReader(reader, server.getEnv()).readCommand();
                 RespArray result = new RespArray(command.execute().serialize());
                 writer.write(result);

@@ -1,5 +1,7 @@
 package com.itmo.java.client.connection;
 
+import com.itmo.java.basics.console.DatabaseCommandResult;
+import com.itmo.java.basics.console.impl.SuccessDatabaseCommandResult;
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
@@ -9,16 +11,19 @@ import com.itmo.java.protocol.model.RespObject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 /**
  * С помощью {@link RespWriter} и {@link RespReader} читает/пишет в сокет
  */
 public class SocketKvsConnection implements KvsConnection {
     Socket socket;
+    private  final ConnectionConfig config;
     private RespReader reader;
     private RespWriter writer;
 
     public SocketKvsConnection(ConnectionConfig config) {
+        this.config = config;
         try {
             socket = new Socket(config.getHost(), config.getPort());
             reader = new RespReader(socket.getInputStream());
@@ -38,6 +43,7 @@ public class SocketKvsConnection implements KvsConnection {
     public synchronized RespObject send(int commandId, RespArray command) throws ConnectionException {
         try {
             writer.write(command);
+            //DatabaseCommandResult result = new SuccessDatabaseCommandResult(reader.readArray().asString().getBytes(StandardCharsets.UTF_8));
             return reader.readArray();
         } catch (IOException e) {
             throw new ConnectionException("yes", e);

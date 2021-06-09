@@ -160,11 +160,11 @@ public class JavaSocketServerConnector implements Closeable {
                     writer.write(result);
                 }
             } catch (Exception e) {
-                try {
-                    writer.write(new RespError("vse slomalos".getBytes(StandardCharsets.UTF_8)));
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
+//                try {
+//                    writer.write(new RespError("vse slomalos".getBytes(StandardCharsets.UTF_8)));
+//                } catch (IOException ioException) {
+//                    ioException.printStackTrace();
+//                }
                 e.printStackTrace();
             }
         }

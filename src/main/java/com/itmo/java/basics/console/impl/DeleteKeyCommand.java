@@ -61,6 +61,6 @@ public class DeleteKeyCommand implements DatabaseCommand {
             return DatabaseCommandResult.error("nothing to delete");
         }
         System.out.println(new String(previous.get()));
-        return DatabaseCommandResult.success(("previous value was " + new String(previous.get())).getBytes(StandardCharsets.UTF_8));
+        return DatabaseCommandResult.success((new String(previous.get())).getBytes(StandardCharsets.UTF_8));
     }
 }

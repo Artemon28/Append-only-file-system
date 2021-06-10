@@ -186,13 +186,13 @@ public class JavaSocketServerConnector implements Closeable {
 //                        writer.write(command.execute().serialize());
 //                    }
                 }
-                close();
             } catch (ExecutionException e1) {
                 e1.printStackTrace();
             } catch (Exception e2) {
                 e2.printStackTrace();
                 throw new UncheckedIOException("qqq", new IOException("da"));
             }
+            close();
         }
 
         /**

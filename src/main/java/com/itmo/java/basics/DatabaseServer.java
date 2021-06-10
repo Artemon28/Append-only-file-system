@@ -1,7 +1,6 @@
 package com.itmo.java.basics;
 
 import com.itmo.java.basics.console.*;
-import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
 import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.initialization.impl.DatabaseServerInitializer;
 import com.itmo.java.basics.initialization.impl.InitializationContextImpl;
@@ -12,9 +11,6 @@ import java.util.List;
 import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.ExecutionEnvironment;
-import com.itmo.java.basics.exceptions.DatabaseException;
-import com.itmo.java.basics.initialization.impl.DatabaseServerInitializer;
-import com.itmo.java.protocol.model.RespArray;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +18,7 @@ import java.util.concurrent.Executors;
 
 public class DatabaseServer {
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     /**
      * Конструктор

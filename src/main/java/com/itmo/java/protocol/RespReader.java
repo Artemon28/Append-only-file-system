@@ -71,28 +71,35 @@ public class RespReader implements AutoCloseable {
         }
     }
 
-
-    private int readInt() throws IOException {
+    private String readStringUntilSymbol(byte symbol) throws IOException {
         try{
-            StringBuilder size = new StringBuilder();
-            byte[] sizeByte = is.readNBytes(1);
-            if (sizeByte.length == 0){
+            StringBuilder readString = new StringBuilder();
+            byte[] readByte = is.readNBytes(1);
+            if (readByte.length == 0){
                 throw new EOFException("end of the stream");
             }
-            while (sizeByte[0] != CR){
-                size.append(new String(sizeByte));
-                sizeByte = is.readNBytes(1);
-                if (sizeByte.length == 0){
+            while (readByte[0] != symbol){
+                readString.append(new String(readByte));
+                readByte = is.readNBytes(1);
+                if (readByte.length == 0){
                     throw new EOFException("end of the stream");
                 }
             }
-            try {
-                return Integer.parseInt(size.toString());
-            } catch (NumberFormatException e) {
-                throw new IOException("expected reading int from this string: " + size.toString());
-            }
+            return readString.toString();
+        } catch (IOException e) {
+            throw new IOException("IOException in reading until Symbol", e);
+        }
+
+    }
+
+
+    private int readInt() throws IOException {
+        try{
+            return Integer.parseInt(readStringUntilSymbol(CR));
         } catch (IOException e) {
             throw new IOException("IO exception in reading int", e);
+        } catch (NumberFormatException e) {
+            throw new IOException("expected reading int", e);
         }
     }
 
@@ -104,20 +111,9 @@ public class RespReader implements AutoCloseable {
      */
     public RespError readError() throws IOException {
         try{
-            StringBuilder errorMessage = new StringBuilder();
-            byte[] currentSymbol = is.readNBytes(1);
-            if (currentSymbol.length == 0){
-                throw new EOFException("end of the stream");
-            }
-            while (currentSymbol[0] != CR){
-                errorMessage.append(new String(currentSymbol));
-                currentSymbol = is.readNBytes(1);
-                if (currentSymbol.length == 0){
-                    throw new EOFException("end of the stream");
-                }
-            }
+            String errorMessage = readStringUntilSymbol(CR);
             readCompareByte(LF);
-            return new RespError(errorMessage.toString().getBytes(StandardCharsets.UTF_8));
+            return new RespError(errorMessage.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IOException("IO exception in reading Error", e);
         }

@@ -1,10 +1,5 @@
 package com.itmo.java.protocol.model;
 
-import com.itmo.java.basics.index.impl.SegmentOffsetInfoImpl;
-import com.itmo.java.basics.logic.impl.SetDatabaseRecord;
-import com.itmo.java.basics.logic.io.DatabaseOutputStream;
-
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -58,12 +53,11 @@ public class RespBulkString implements RespObject {
         os.write(CODE);
         if (data == null){
             os.write(Integer.toString(NULL_STRING_SIZE).getBytes(StandardCharsets.UTF_8));
-            os.write(CRLF);
         } else {
             os.write(Integer.toString(data.length).getBytes(StandardCharsets.UTF_8));
             os.write(CRLF);
             os.write(data);
-            os.write(CRLF);
         }
+        os.write(CRLF);
     }
 }

@@ -1,9 +1,5 @@
 package com.itmo.java.client.connection;
 
-import com.itmo.java.basics.console.DatabaseCommand;
-import com.itmo.java.basics.console.DatabaseCommandResult;
-import com.itmo.java.basics.console.impl.SuccessDatabaseCommandResult;
-import com.itmo.java.basics.resp.CommandReader;
 import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
@@ -13,7 +9,6 @@ import com.itmo.java.protocol.model.RespObject;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 /**
  * С помощью {@link RespWriter} и {@link RespReader} читает/пишет в сокет
@@ -29,7 +24,7 @@ public class SocketKvsConnection implements KvsConnection {
             reader = new RespReader(socket.getInputStream());
             writer = new RespWriter(this.socket.getOutputStream());
         } catch (IOException e) {
-            throw new UncheckedIOException(e.getMessage(), e);
+            throw new UncheckedIOException("IOException in constructor of SocketKvsConnection", e);
         }
     }
 
@@ -45,7 +40,7 @@ public class SocketKvsConnection implements KvsConnection {
             writer.write(command);
             return reader.readObject();
         } catch (IOException e) {
-            throw new ConnectionException("yes", e);
+            throw new ConnectionException("IOException in sending command", e);
         }
     }
 

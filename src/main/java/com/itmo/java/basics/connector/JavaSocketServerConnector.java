@@ -90,7 +90,7 @@ public class JavaSocketServerConnector implements Closeable {
     public void close() {
         System.out.println("Stopping socket connector");
         try {
-            //clientIOWorkers.shutdownNow();
+            clientIOWorkers.shutdownNow();
             connectionAcceptorExecutor.shutdownNow();
             serverSocket.close();
         } catch (IOException e) {
@@ -173,18 +173,11 @@ public class JavaSocketServerConnector implements Closeable {
             try(CommandReader commandReader = new CommandReader(reader, server.getEnv())) {
                 while (commandReader.hasNextCommand()) {
                     DatabaseCommand command = commandReader.readCommand();
-                    //try {
-                        DatabaseCommandResult t = server.executeNextCommand(command).get();
-                        writer.write(t.serialize());
-//                    } catch (InterruptedException e){
-//                        writer.write(command.execute().serialize());
-//                    }
+                    DatabaseCommandResult t = server.executeNextCommand(command).get();
+                    writer.write(t.serialize());
                 }
-            } catch (ExecutionException e1) {
-                e1.printStackTrace();
-            } catch (Exception e2) {
-                e2.printStackTrace();
-                throw new UncheckedIOException("qqq", new IOException("da"));
+            } catch (Exception e) {
+                throw new UncheckedIOException("exception in run", (IOException) e);
             }
             close();
         }

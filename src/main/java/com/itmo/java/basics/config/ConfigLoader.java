@@ -9,9 +9,6 @@ import java.util.Properties;
  */
 public class ConfigLoader {
     Properties configFileProp = new Properties();
-    private String workingPath;
-    private String host;
-    private int port;
 
     /**
      * По умолчанию читает из server.properties
@@ -48,12 +45,13 @@ public class ConfigLoader {
      * Читаются: "kvs.workingPath", "kvs.host", "kvs.port" (но в конфигурационном файле допустимы и другие проперти)
      */
     public DatabaseServerConfig readConfig() {
-        workingPath = configFileProp.getProperty("kvs.workingPath");
-        host = configFileProp.getProperty("kvs.host");
+        String workingPath = configFileProp.getProperty("kvs.workingPath");
+        String host = configFileProp.getProperty("kvs.host");
         String stringPort = configFileProp.getProperty("kvs.port");
         if (host == null){
             host = ServerConfig.DEFAULT_HOST;
         }
+        int port;
         if (stringPort == null) {
             port = ServerConfig.DEFAULT_PORT;
         } else {

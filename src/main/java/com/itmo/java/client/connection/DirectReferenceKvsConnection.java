@@ -3,12 +3,9 @@ package com.itmo.java.client.connection;
 import com.itmo.java.basics.DatabaseServer;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.client.exception.ConnectionException;
-import com.itmo.java.client.exception.DatabaseExecutionException;
 import com.itmo.java.protocol.model.RespArray;
-import com.itmo.java.protocol.model.RespBulkString;
 import com.itmo.java.protocol.model.RespObject;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**

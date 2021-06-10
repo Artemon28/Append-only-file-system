@@ -1,6 +1,5 @@
 package com.itmo.java.client.client;
 
-import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.client.command.*;
 import com.itmo.java.client.connection.KvsConnection;
 import com.itmo.java.client.exception.ConnectionException;

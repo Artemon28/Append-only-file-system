@@ -62,17 +62,19 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
-            try {
+//            try {
+            while(true) {
                 Socket clientSocket = serverSocket.accept();
                 clientIOWorkers.submit(() -> {
-                    ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
-                    clientTask.run();
+                            ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
+                            clientTask.run();
                 });
-            } catch (IOException e) {
-                throw new UncheckedIOException("exception in accepting new client socket", e);
-            } finally {
-                close();
             }
+//            } catch (IOException e) {
+//                throw new UncheckedIOException("exception in accepting new client socket", e);
+//            } finally {
+//                close();
+//            }
         });
     }
 
@@ -83,7 +85,7 @@ public class JavaSocketServerConnector implements Closeable {
     public void close() {
         System.out.println("Stopping socket connector");
         try {
-            clientIOWorkers.shutdownNow();
+            //clientIOWorkers.shutdownNow();
             connectionAcceptorExecutor.shutdownNow();
             serverSocket.close();
         } catch (IOException e) {
@@ -107,20 +109,20 @@ public class JavaSocketServerConnector implements Closeable {
         RespObject q;
         try(SocketKvsConnection socketKvsConnection =
                     new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
-//            KvsCommand k = new CreateDatabaseKvsCommand("t1");
-//            q = socketKvsConnection.send(k.getCommandId(), k.serialize());
-//            System.out.println(q.asString());
-//            q = socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
-//            System.out.println(q.asString());
-//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "qwertyuiolk,mjnhgfdsdfghjklkjhgf").serialize());
-//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key2", ",lkjhgfdcfvbghnjmki").serialize());
-//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key3", "KEKW OMEGALUL").serialize());
-//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "djbetrhrtnij 6yj ur jy dy jyd").serialize());
-//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key4", "hjlhui redtybrtui yuk tyrj yt r").serialize());
-//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
-//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
-//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
-//            System.out.println(q.asString());
+            KvsCommand k = new CreateDatabaseKvsCommand("t1");
+            q = socketKvsConnection.send(k.getCommandId(), k.serialize());
+            System.out.println(q.asString());
+            q = socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
+            System.out.println(q.asString());
+            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "qwertyuiolk,mjnhgfdsdfghjklkjhgf").serialize());
+            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key2", ",lkjhgfdcfvbghnjmki").serialize());
+            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key3", "KEKW OMEGALUL").serialize());
+            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "djbetrhrtnij 6yj ur jy dy jyd").serialize());
+            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key4", "hjlhui redtybrtui yuk tyrj yt r").serialize());
+            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+            System.out.println(q.asString());
             q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "key1").serialize());
             System.out.println(q.asString());
             q = socketKvsConnection.send(1, new DeleteKvsCommand("t1", "da", "aaa").serialize());
@@ -135,7 +137,7 @@ public class JavaSocketServerConnector implements Closeable {
      */
     static class ClientTask implements Runnable, Closeable {
 
-        private final Socket client;
+        private final Socket clientSocket;
         private final DatabaseServer server;
         private RespReader reader;
         private RespWriter writer;
@@ -144,7 +146,7 @@ public class JavaSocketServerConnector implements Closeable {
          * @param server сервер, на котором исполняется задача
          */
         public ClientTask(Socket client, DatabaseServer server) {
-            this.client = client;
+            this.clientSocket = client;
             this.server = server;
             try {
                 reader = new RespReader(client.getInputStream());
@@ -166,14 +168,12 @@ public class JavaSocketServerConnector implements Closeable {
             try(CommandReader commandReader = new CommandReader(reader, server.getEnv())) {
                 while (commandReader.hasNextCommand()) {
                     DatabaseCommand command = commandReader.readCommand();
-                    try {
+                    //try {
                         DatabaseCommandResult t = server.executeNextCommand(command).get();
                         writer.write(t.serialize());
-                    } catch (InterruptedException e){
-                        writer.write(command.execute().serialize());
-                    }
-                    //CompletableFuture<DatabaseCommandResult> databaseCommandFuture = server.executeNextCommand(command);
-                    //writer.write(server.executeNextCommand(command).get().serialize());
+//                    } catch (InterruptedException e){
+//                        writer.write(command.execute().serialize());
+//                    }
                 }
                 close();
             } catch (ExecutionException e1) {
@@ -190,7 +190,7 @@ public class JavaSocketServerConnector implements Closeable {
         @Override
         public void close() {
             try {
-                client.close();
+                clientSocket.close();
                 reader.close();
                 writer.close();
             } catch (IOException e) {

@@ -62,31 +62,25 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
-            try {
+            while (true) {
                 Socket clientSocket = serverSocket.accept();
                 clientIOWorkers.submit(() -> {
                     ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
                     clientTask.run();
                 });
-            } catch (IOException e) {
-                throw new UncheckedIOException("exception in accepting new client socket", e);
             }
         });
-//        connectionAcceptorExecutor.submit(() -> {
-////            try {
-//            while(true) {
+//            try {
 //                Socket clientSocket = serverSocket.accept();
 //                clientIOWorkers.submit(() -> {
 //                    ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
-//                    clientTask.run();
 //                });
+//            } catch (IOException e) {
+//                throw new UncheckedIOException("exception in accepting new client socket", e);
 //            }
-////            } catch (IOException e) {
-////                throw new UncheckedIOException("exception in accepting new client socket", e);
-////            } finally {
-////                close();
-////            }
 //        });
+//        connectionAcceptorExecutor.submit(() -> {
+
     }
 
     /**

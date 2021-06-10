@@ -1,38 +1,21 @@
 package com.itmo.java.basics.connector;
 
 import com.itmo.java.basics.DatabaseServer;
-import com.itmo.java.basics.config.ConfigLoader;
-import com.itmo.java.basics.config.DatabaseConfig;
 import com.itmo.java.basics.config.ServerConfig;
 import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandResult;
-import com.itmo.java.basics.console.DatabaseCommands;
-import com.itmo.java.basics.console.ExecutionEnvironment;
-import com.itmo.java.basics.console.impl.ExecutionEnvironmentImpl;
-import com.itmo.java.basics.initialization.impl.DatabaseInitializer;
-import com.itmo.java.basics.initialization.impl.DatabaseServerInitializer;
-import com.itmo.java.basics.initialization.impl.SegmentInitializer;
-import com.itmo.java.basics.initialization.impl.TableInitializer;
 import com.itmo.java.basics.resp.CommandReader;
-import com.itmo.java.client.client.SimpleKvsClient;
-import com.itmo.java.client.command.*;
-import com.itmo.java.client.connection.ConnectionConfig;
-import com.itmo.java.client.connection.KvsConnection;
-import com.itmo.java.client.connection.SocketKvsConnection;
-import com.itmo.java.client.exception.ConnectionException;
 import com.itmo.java.protocol.RespReader;
 import com.itmo.java.protocol.RespWriter;
-import com.itmo.java.protocol.model.*;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.*;
-import java.util.function.Supplier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 /**
  * Класс, который предоставляет доступ к серверу через сокеты
@@ -62,14 +45,6 @@ public class JavaSocketServerConnector implements Closeable {
      */
     public void start() {
         connectionAcceptorExecutor.submit(() -> {
-//            while (true) {
-//                Socket clientSocket = serverSocket.accept();
-//                clientIOWorkers.submit(() -> {
-//                    ClientTask clientTask = new ClientTask(clientSocket, databaseServer);
-//                    clientTask.run();
-//                });
-//            }
-//        });
             try {
                 Socket clientSocket = serverSocket.accept();
                 clientIOWorkers.submit(() -> {
@@ -100,41 +75,41 @@ public class JavaSocketServerConnector implements Closeable {
 
 
     public static void main(String[] args) throws Exception {
-        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
-        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
-        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
-        DatabaseServerInitializer initializer =
-                new DatabaseServerInitializer(
-                        new DatabaseInitializer(
-                                new TableInitializer(
-                                        new SegmentInitializer())));
-        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
-        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
-        j.start();
-        RespObject q;
-        try(SocketKvsConnection socketKvsConnection =
-                    new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
-            KvsCommand k = new CreateDatabaseKvsCommand("t1");
-            q = socketKvsConnection.send(k.getCommandId(), k.serialize());
-            System.out.println(q.asString());
-            q = socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
-            System.out.println(q.asString());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "qwertyuiolk,mjnhgfdsdfghjklkjhgf").serialize());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key2", ",lkjhgfdcfvbghnjmki").serialize());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key3", "KEKW OMEGALUL").serialize());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "djbetrhrtnij 6yj ur jy dy jyd").serialize());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key4", "hjlhui redtybrtui yuk tyrj yt r").serialize());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
-            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
-            System.out.println(q.asString());
-            q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "key1").serialize());
-            System.out.println(q.asString());
-            q = socketKvsConnection.send(1, new DeleteKvsCommand("t1", "da", "aaa").serialize());
-
-        }
-        System.out.println(q.asString());
-        j.close();
+//        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
+//        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
+//        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
+//        DatabaseServerInitializer initializer =
+//                new DatabaseServerInitializer(
+//                        new DatabaseInitializer(
+//                                new TableInitializer(
+//                                        new SegmentInitializer())));
+//        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
+//        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
+//        j.start();
+//        RespObject q;
+//        try(SocketKvsConnection socketKvsConnection =
+//                    new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
+//            KvsCommand k = new CreateDatabaseKvsCommand("t1");
+//            q = socketKvsConnection.send(k.getCommandId(), k.serialize());
+//            System.out.println(q.asString());
+//            q = socketKvsConnection.send(1, new CreateTableKvsCommand("t1", "da").serialize());
+//            System.out.println(q.asString());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "qwertyuiolk,mjnhgfdsdfghjklkjhgf").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key2", ",lkjhgfdcfvbghnjmki").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key3", "KEKW OMEGALUL").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "djbetrhrtnij 6yj ur jy dy jyd").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key4", "hjlhui redtybrtui yuk tyrj yt r").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+//            q = socketKvsConnection.send(1, new SetKvsCommand("t1", "da", "key1", "oiujhgfvgbnm,mnbdfbfgjfcj").serialize());
+//            System.out.println(q.asString());
+//            q = socketKvsConnection.send(1, new GetKvsCommand("t1", "da", "key1").serialize());
+//            System.out.println(q.asString());
+//            q = socketKvsConnection.send(1, new DeleteKvsCommand("t1", "da", "aaa").serialize());
+//
+//        }
+//        System.out.println(q.asString());
+//        j.close();
     }
 
     /**
@@ -144,8 +119,8 @@ public class JavaSocketServerConnector implements Closeable {
 
         private final Socket clientSocket;
         private final DatabaseServer server;
-        private RespReader reader;
-        private RespWriter writer;
+        private final RespReader reader;
+        private final RespWriter writer;
         /**
          * @param client клиентский сокет
          * @param server сервер, на котором исполняется задача
@@ -157,7 +132,7 @@ public class JavaSocketServerConnector implements Closeable {
                 reader = new RespReader(client.getInputStream());
                 writer = new RespWriter(client.getOutputStream());
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new UncheckedIOException("IOException in constructor of ClientTask", e);
             }
         }
 
@@ -173,8 +148,8 @@ public class JavaSocketServerConnector implements Closeable {
             try(CommandReader commandReader = new CommandReader(reader, server.getEnv())) {
                 while (commandReader.hasNextCommand()) {
                     DatabaseCommand command = commandReader.readCommand();
-                    DatabaseCommandResult t = server.executeNextCommand(command).get();
-                    writer.write(t.serialize());
+                    DatabaseCommandResult databaseCommandResult = server.executeNextCommand(command).get();
+                    writer.write(databaseCommandResult.serialize());
                 }
             } catch (Exception e) {
                 throw new UncheckedIOException("exception in run", (IOException) e);

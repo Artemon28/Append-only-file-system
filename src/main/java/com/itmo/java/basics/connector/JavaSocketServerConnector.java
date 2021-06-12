@@ -21,16 +21,14 @@ import java.util.concurrent.Executors;
  * Класс, который предоставляет доступ к серверу через сокеты
  */
 public class JavaSocketServerConnector implements Closeable {
-    private final DatabaseServer databaseServer;
 
     /**
      * Экзекьютор для выполнения ClientTask
      */
     private final ExecutorService clientIOWorkers = Executors.newSingleThreadExecutor();
-
-    private final ServerSocket serverSocket;
     private final ExecutorService connectionAcceptorExecutor = Executors.newSingleThreadExecutor();
-
+    private final DatabaseServer databaseServer;
+    private final ServerSocket serverSocket;
 
     /**
      * Стартует сервер. По аналогии с сокетом открывает коннекшн в конструкторе.
@@ -75,26 +73,6 @@ public class JavaSocketServerConnector implements Closeable {
 
 
     public static void main(String[] args) throws Exception {
-//        ServerConfig serverConfig = new ConfigLoader().readConfig().getServerConfig();
-//        DatabaseConfig databaseConfig = new ConfigLoader().readConfig().getDbConfig();
-//        ExecutionEnvironment env = new ExecutionEnvironmentImpl(databaseConfig);
-//        DatabaseServerInitializer initializer =
-//                new DatabaseServerInitializer(
-//                        new DatabaseInitializer(
-//                                new TableInitializer(
-//                                        new SegmentInitializer())));
-//        DatabaseServer databaseServer = DatabaseServer.initialize(env, initializer);
-//        JavaSocketServerConnector j = new JavaSocketServerConnector(databaseServer, serverConfig);
-//        j.start();
-//        RespObject q;
-//        try(SocketKvsConnection socketKvsConnection =
-//                    new SocketKvsConnection(new ConnectionConfig(serverConfig.getHost(), serverConfig.getPort()))) {
-//            KvsCommand k = new CreateDatabaseKvsCommand("t1");
-//            q = socketKvsConnection.send(k.getCommandId(), k.serialize());
-//            System.out.println(q.asString());
-//        }
-//        System.out.println(q.asString());
-//        j.close();
     }
 
     /**

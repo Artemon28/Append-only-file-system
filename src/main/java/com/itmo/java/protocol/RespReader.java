@@ -34,7 +34,7 @@ public class RespReader implements AutoCloseable {
         }
         byte[] currentRespObjectType = is.readNBytes(1);
         if (currentRespObjectType.length == 0){
-            throw new EOFException("end of the stream");
+            throw new EOFException("end of the stream instead of " + String.valueOf(RespArray.CODE));
         }
         if (currentRespObjectType[0] == RespArray.CODE){
             isHasArray = true;
@@ -54,7 +54,7 @@ public class RespReader implements AutoCloseable {
         try {
             byte[] firstSymbol = is.readNBytes(1);
             if (firstSymbol.length == 0){
-                throw new EOFException("end of the stream");
+                throw new EOFException("end of the stream instead of first symbol of RespObject");
             }
             if (firstSymbol[0] == RespError.CODE){
                 return readError();
@@ -67,7 +67,7 @@ public class RespReader implements AutoCloseable {
             }
             throw new IOException("unknown byte" + new String(firstSymbol));
         } catch (IOException e){
-            throw new IOException("exception in reading object", e);
+            throw new IOException("IOException in reading object", e);
         }
     }
 
@@ -76,7 +76,7 @@ public class RespReader implements AutoCloseable {
             StringBuilder readString = new StringBuilder();
             byte[] readByte = is.readNBytes(1);
             if (readByte.length == 0){
-                throw new EOFException("end of the stream");
+                throw new EOFException("end of the stream instead of symbol " + String.valueOf(symbol));
             }
             while (readByte[0] != symbol){
                 readString.append(new String(readByte));
